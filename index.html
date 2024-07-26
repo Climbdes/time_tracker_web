@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Time Tracker</h1>
+    <div id="register-screen">
+      <label for="name">Ingrese su nombre:</label>
+      <input type="text" id="name" placeholder="Nombre">
+      <label for="weekly-goal-hours">Objetivo semanal (horas):</label>
+      <input type="number" id="weekly-goal-hours" placeholder="Horas">
+      <label for="weekly-goal-minutes">Objetivo semanal (minutos):</label>
+      <input type="number" id="weekly-goal-minutes" placeholder="Minutos">
+      <button id="register-btn">Registrar</button>
+    </div>
+    <div id="tracker-screen" style="display:none;">
+      <h2>Hola, <span id="user-name"></span></h2>
+      <h3>Objetivo semanal: <span id="weekly-goal-display"></span></h3>
+      <div id="timer">00:00:00</div>
+      <button id="start-btn">Iniciar</button>
+      <button id="stop-btn" style="display:none;">Detener</button>
+      <button id="reset-btn">Restablecer</button>
+      <h3>Horas trabajadas esta semana: <span id="weekly-hours">00:00:00</span></h3>
+      <table>
+        <tr>
+          <th>Día</th>
+          <th>Horas trabajadas</th>
+        </tr>
+        <tr>
+          <td>Lunes</td>
+          <td><span id="monday-hours">00:00:00</span></td>
+        </tr>
+        <tr>
+          <td>Martes</td>
+          <td><span id="tuesday-hours">00:00:00</span></td>
+        </tr>
+        <tr>
+          <td>Miércoles</td>
+          <td><span id="wednesday-hours">00:00:00</span></td>
+        </tr>
+        <tr>
+          <td>Jueves</td>
+          <td><span id="thursday-hours">00:00:00</span></td>
+        </tr>
+        <tr>
+          <td>Viernes</td>
+          <td><span id="friday-hours">00:00:00</span></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
