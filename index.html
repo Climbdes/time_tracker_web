@@ -1,72 +1,44 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Time Tracker</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js" type="module"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js" type="module"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js" type="module"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Tracker</title>
 </head>
 <body>
-  <div id="login-screen" class="screen">
-    <h1>Iniciar Sesión</h1>
-    <input type="email" id="login-username" placeholder="Correo Electrónico">
-    <input type="password" id="login-password" placeholder="Contraseña">
-    <button id="login-btn">Iniciar Sesión</button>
-    <button id="show-register-btn">Registrar</button>
-  </div>
-
-  <div id="register-screen" class="screen" style="display: none;">
-    <h1>Registrar</h1>
-    <input type="email" id="register-username" placeholder="Correo Electrónico">
-    <input type="password" id="register-password" placeholder="Contraseña">
-    <input type="number" id="register-weekly-goal" placeholder="Horas Objetivo Semanal" min="0">
-    <button id="register-btn">Registrar</button>
-    <button id="show-login-btn">Iniciar Sesión</button>
-  </div>
-
-  <div id="tracker-screen" class="screen" style="display: none;">
-    <h1>Bienvenido, <span id="user-name"></span></h1>
-    <h2>Objetivo Semanal: <span id="weekly-goal-display"></span></h2>
-    <h2>Horas Semanales: <span id="weekly-hours">00:00:00</span></h2>
-    <table id="daily-hours">
-      <tr>
-        <th>Día</th>
-        <th>Horas</th>
-      </tr>
-      <tr>
-        <td>Lunes</td>
-        <td id="monday-hours">00:00:00</td>
-      </tr>
-      <tr>
-        <td>Martes</td>
-        <td id="tuesday-hours">00:00:00</td>
-      </tr>
-      <tr>
-        <td>Miércoles</td>
-        <td id="wednesday-hours">00:00:00</td>
-      </tr>
-      <tr>
-        <td>Jueves</td>
-        <td id="thursday-hours">00:00:00</td>
-      </tr>
-      <tr>
-        <td>Viernes</td>
-        <td id="friday-hours">00:00:00</td>
-      </tr>
-    </table>
-    <div id="timer">00:00:00</div>
-    <div id="buttons">
-      <button id="start-btn">Iniciar</button>
-      <button id="stop-btn">Detener</button>
-      <button id="reset-btn">Reiniciar</button>
+    <!-- Ejemplo de tu HTML para los botones y pantallas -->
+    <div id="login-screen">
+        <input type="email" id="login-username" placeholder="Email">
+        <input type="password" id="login-password" placeholder="Password">
+        <button id="login-btn">Login</button>
+        <button id="show-register-btn">Register</button>
     </div>
-  </div>
+    <div id="register-screen" style="display:none;">
+        <input type="email" id="register-username" placeholder="Email">
+        <input type="password" id="register-password" placeholder="Password">
+        <input type="number" id="register-weekly-goal" placeholder="Weekly Goal (hours)">
+        <button id="register-btn">Register</button>
+        <button id="show-login-btn">Login</button>
+    </div>
+    <div id="tracker-screen" style="display:none;">
+        <p id="user-name"></p>
+        <p id="weekly-goal-display"></p>
+        <p id="weekly-hours"></p>
+        <p id="timer"></p>
+        <button id="start-btn">Start</button>
+        <button id="stop-btn">Stop</button>
+        <button id="reset-btn">Reset</button>
+        <p>Monday: <span id="monday-hours">00:00:00</span></p>
+        <p>Tuesday: <span id="tuesday-hours">00:00:00</span></p>
+        <p>Wednesday: <span id="wednesday-hours">00:00:00</span></p>
+        <p>Thursday: <span id="thursday-hours">00:00:00</span></p>
+        <p>Friday: <span id="friday-hours">00:00:00</span></p>
+    </div>
 
-  <script src="firebase-config.js" type="module"></script>
-  <script src="script.js" type="module"></script>
+    <!-- Cargar los módulos JavaScript -->
+    <script src="firebase-config.js" type="module"></script>
+    <script src="script.js" type="module"></script>
 </body>
 </html>
+
 
