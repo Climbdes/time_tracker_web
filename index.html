@@ -5,14 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Time Tracker</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+  <script type="module" src="firebase-config.js"></script>
+  <script type="module" src="script.js"></script>
 </head>
 <body>
-  <div id="register-screen" class="screen">
-    <h1>Registro</h1>
-    <input type="text" id="name" placeholder="Tu nombre">
-    <h2>Objetivo Semanal</h2>
-    <input type="number" id="weekly-goal-hours" placeholder="Horas" min="0">
+  <div id="login-screen" class="screen">
+    <h1>Iniciar Sesión</h1>
+    <input type="email" id="login-username" placeholder="Correo Electrónico">
+    <input type="password" id="login-password" placeholder="Contraseña">
+    <button id="login-btn">Iniciar Sesión</button>
+    <button id="show-register-btn">Registrar</button>
+  </div>
+
+  <div id="register-screen" class="screen" style="display: none;">
+    <h1>Registrar</h1>
+    <input type="email" id="register-username" placeholder="Correo Electrónico">
+    <input type="password" id="register-password" placeholder="Contraseña">
+    <input type="number" id="register-weekly-goal" placeholder="Horas Objetivo Semanal" min="0">
     <button id="register-btn">Registrar</button>
+    <button id="show-login-btn">Iniciar Sesión</button>
   </div>
 
   <div id="tracker-screen" class="screen" style="display: none;">
@@ -53,9 +67,7 @@
     </div>
   </div>
 
+  <script src="firebase-config.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
-</body>
-</html>
-

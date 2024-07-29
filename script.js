@@ -1,7 +1,18 @@
+import { auth, db } from './firebase-config.js';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+
 document.addEventListener('DOMContentLoaded', () => {
-  const nameInput = document.getElementById('name');
-  const weeklyGoalHoursInput = document.getElementById('weekly-goal-hours');
+  const loginUsername = document.getElementById('login-username');
+  const loginPassword = document.getElementById('login-password');
+  const loginBtn = document.getElementById('login-btn');
+  const showRegisterBtn = document.getElementById('show-register-btn');
+  const registerUsername = document.getElementById('register-username');
+  const registerPassword = document.getElementById('register-password');
+  const registerWeeklyGoal = document.getElementById('register-weekly-goal');
   const registerBtn = document.getElementById('register-btn');
+  const showLoginBtn = document.getElementById('show-login-btn');
+  const loginScreen = document.getElementById('login-screen');
   const registerScreen = document.getElementById('register-screen');
   const trackerScreen = document.getElementById('tracker-screen');
   const userName = document.getElementById('user-name');
@@ -11,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const startBtn = document.getElementById('start-btn');
   const stopBtn = document.getElementById('stop-btn');
   const resetBtn = document.getElementById('reset-btn');
-
   const dailyHoursDisplays = {
     monday: document.getElementById('monday-hours'),
     tuesday: document.getElementById('tuesday-hours'),
@@ -33,109 +43,8 @@ document.addEventListener('DOMContentLoaded', () => {
     friday: 0,
   };
 
-  function loadData() {
-    const savedName = localStorage.getItem('userName');
-    const savedWeeklyGoal = JSON.parse(localStorage.getItem('weeklyGoal'));
-    const savedWeeklyHours = JSON.parse(localStorage.getItem('weeklyHours'));
-    const savedDailyHours = JSON.parse(localStorage.getItem('dailyHours'));
-    const savedTimerData = JSON.parse(localStorage.getItem('timerData'));
-    const savedWeekStartDate = localStorage.getItem('weekStartDate');
-
-    console.log('Cargando datos...');
-    console.log('savedName:', savedName);
-    console.log('savedWeeklyGoal:', savedWeeklyGoal);
-    console.log('savedWeeklyHours:', savedWeeklyHours);
-    console.log('savedDailyHours:', savedDailyHours);
-    console.log('savedTimerData:', savedTimerData);
-    console.log('savedWeekStartDate:', savedWeekStartDate);
-
-    if (savedName) {
-      userName.textContent = savedName;
-      nameInput.value = savedName;
-    }
-
-    if (savedWeeklyGoal) {
-      weeklyGoal = savedWeeklyGoal;
-      weeklyGoalDisplay.textContent = `${Math.floor(weeklyGoal / 3600)}:00:00`;
-    }
-
-    if (savedWeeklyHours) {
-      weeklyHours = savedWeeklyHours;
-      updateWeeklyHoursDisplay();
-    }
-
-    if (savedDailyHours) {
-      dailyHours = savedDailyHours;
-      updateDailyHoursDisplay();
-    }
-
-    if (savedTimerData) {
-      elapsedSeconds = savedTimerData.elapsedSeconds;
-      isRunning = savedTimerData.isRunning;
-      const startTime = savedTimerData.startTime ? new Date(savedTimerData.startTime) : null;
-
-      if (isRunning) {
-        const now = new Date();
-        const secondsPassed = Math.floor((now - startTime) / 1000);
-        elapsedSeconds += secondsPassed;
-        timer = setInterval(updateTimer, 1000);
-      }
-
-      updateTimerDisplay();
-    }
-
-    if (savedWeekStartDate) {
-      const lastWeekStartDate = new Date(parseInt(savedWeekStartDate));
-      const now = new Date();
-
-      if (!isSameWeek(lastWeekStartDate, now)) {
-        resetWeeklyData();
-      }
-    } else {
-      localStorage.setItem('weekStartDate', new Date().getTime());
-    }
-  }
-
-  function saveData() {
-    console.log('Guardando datos...');
-    console.log('userName:', nameInput.value);
-    console.log('weeklyGoal:', weeklyGoal);
-    console.log('weeklyHours:', weeklyHours);
-    console.log('dailyHours:', dailyHours);
-    console.log('timerData:', {
-      elapsedSeconds,
-      isRunning,
-      startTime: isRunning ? (new Date()).toISOString() : null
-    });
-    
-    localStorage.setItem('userName', nameInput.value);
-    localStorage.setItem('weeklyGoal', JSON.stringify(weeklyGoal));
-    localStorage.setItem('weeklyHours', JSON.stringify(weeklyHours));
-    localStorage.setItem('dailyHours', JSON.stringify(dailyHours));
-    localStorage.setItem('timerData', JSON.stringify({
-      elapsedSeconds,
-      isRunning,
-      startTime: isRunning ? (new Date()).toISOString() : null
-    }));
-    localStorage.setItem('weekStartDate', new Date().getTime());
-  }
-
-  function isSameWeek(date1, date2) {
-    const startOfWeek1 = new Date(date1.setDate(date1.getDate() - date1.getDay()));
-    const startOfWeek2 = new Date(date2.setDate(date2.getDate() - date2.getDay()));
-
-    return startOfWeek1.getTime() === startOfWeek2.getTime();
-  }
-
-  function resetWeeklyData() {
-    weeklyHours = 0;
-    dailyHours = {
-      monday: 0,
-      tuesday: 0,
-      wednesday: 0,
-      thursday: 0,
-      friday: 0,
-    };
+  function updateDisplay() {
+    updateTimerDisplay();
     updateWeeklyHoursDisplay();
     updateDailyHoursDisplay();
   }
@@ -143,60 +52,126 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateTimer() {
     elapsedSeconds++;
     updateTimerDisplay();
-    saveData();
   }
 
   function updateTimerDisplay() {
-    const hours = Math.floor(elapsedSeconds / 3600).toString().padStart(2, '0');
-    const minutes = Math.floor((elapsedSeconds % 3600) / 60).toString().padStart(2, '0');
-    const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
-    timerDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+    timerDisplay.textContent = formatTime(elapsedSeconds);
+  }
+
+  function formatTime(seconds) {
+    const hours = Math.floor(seconds / 3600).toString().padStart(2, '0');
+    const minutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+    const secondsFormatted = (seconds % 60).toString().padStart(2, '0');
+    return `${hours}:${minutes}:${secondsFormatted}`;
   }
 
   function updateWeeklyHoursDisplay() {
-    const hours = Math.floor(weeklyHours / 3600).toString().padStart(2, '0');
-    const minutes = Math.floor((weeklyHours % 3600) / 60).toString().padStart(2, '0');
-    const seconds = (weeklyHours % 60).toString().padStart(2, '0');
-    weeklyHoursDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+    weeklyHoursDisplay.textContent = formatTime(weeklyHours);
   }
 
   function updateDailyHoursDisplay() {
     for (const day in dailyHoursDisplays) {
-      const totalSeconds = dailyHours[day];
-      const hours = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
-      const minutes = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
-      const seconds = (totalSeconds % 60).toString().padStart(2, '0');
-      dailyHoursDisplays[day].textContent = `${hours}:${minutes}:${seconds}`;
+      dailyHoursDisplays[day].textContent = formatTime(dailyHours[day]);
     }
   }
 
-  function getCurrentDay() {
-    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    const today = new Date().getDay();
-    return days[today];
+  async function saveData(uid) {
+    try {
+      await setDoc(doc(db, 'users', uid), {
+        weeklyGoal,
+        dailyHours
+      });
+      console.log('Datos guardados correctamente');
+    } catch (error) {
+      console.error('Error al guardar los datos:', error);
+    }
   }
+
+  async function loadUserData(uid) {
+    try {
+      const docSnap = await getDoc(doc(db, 'users', uid));
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        weeklyGoal = data.weeklyGoal;
+        weeklyGoalDisplay.textContent = formatTime(weeklyGoal);
+        dailyHours = data.dailyHours;
+        weeklyHours = Object.values(dailyHours).reduce((acc, hours) => acc + hours, 0);
+        updateDisplay();
+      } else {
+        console.error('No such document!');
+      }
+    } catch (error) {
+      console.error('Error getting document:', error);
+    }
+  }
+
+  loginBtn.addEventListener('click', () => {
+    const username = loginUsername.value.trim();
+    const password = loginPassword.value.trim();
+
+    if (username && password) {
+      signInWithEmailAndPassword(auth, username, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          userName.textContent = username;
+          loadUserData(user.uid);
+          loginScreen.style.display = 'none';
+          trackerScreen.style.display = 'block';
+        })
+        .catch((error) => {
+          alert(`Error: ${error.message}`);
+        });
+    } else {
+      alert('Por favor, introduce un nombre de usuario y una contraseña válidos.');
+    }
+  });
 
   registerBtn.addEventListener('click', () => {
-    const name = nameInput.value.trim();
-    const weeklyGoalHours = parseInt(weeklyGoalHoursInput.value) || 0;
+    const username = registerUsername.value.trim();
+    const password = registerPassword.value.trim();
+    const weeklyGoalHours = parseInt(registerWeeklyGoal.value) || 0;
 
-    if (name && weeklyGoalHours > 0) {
-      userName.textContent = name;
-      weeklyGoal = weeklyGoalHours * 3600;
-      weeklyGoalDisplay.textContent = `${weeklyGoalHours.toString().padStart(2, '0')}:00:00`;
-      registerScreen.style.display = 'none';
-      trackerScreen.style.display = 'block';
-      saveData();
+    if (username && password && weeklyGoalHours > 0) {
+      createUserWithEmailAndPassword(auth, username, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          return setDoc(doc(db, 'users', user.uid), {
+            weeklyGoal: weeklyGoalHours * 3600,
+            dailyHours: {
+              monday: 0,
+              tuesday: 0,
+              wednesday: 0,
+              thursday: 0,
+              friday: 0
+            }
+          });
+        })
+        .then(() => {
+          alert('Usuario registrado exitosamente');
+          showLoginBtn.click();
+        })
+        .catch((error) => {
+          alert(`Error: ${error.message}`);
+        });
     } else {
-      alert('Por favor, introduce un nombre y un objetivo semanal válido.');
+      alert('Por favor, introduce un nombre de usuario, una contraseña y un objetivo semanal válido.');
     }
+  });
+
+  showRegisterBtn.addEventListener('click', () => {
+    loginScreen.style.display = 'none';
+    registerScreen.style.display = 'block';
+  });
+
+  showLoginBtn.addEventListener('click', () => {
+    registerScreen.style.display = 'none';
+    loginScreen.style.display = 'block';
   });
 
   startBtn.addEventListener('click', () => {
     if (!isRunning) {
       timer = setInterval(updateTimer, 1000);
       isRunning = true;
-      saveData();
     }
   });
 
@@ -204,27 +179,36 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isRunning) {
       clearInterval(timer);
       isRunning = false;
-      const day = getCurrentDay();
-      dailyHours[day] += elapsedSeconds;
+      const today = new Date().toLocaleDateString('es-ES', { weekday: 'long' }).toLowerCase();
+      dailyHours[today] += elapsedSeconds;
       weeklyHours += elapsedSeconds;
       elapsedSeconds = 0;
-      updateTimerDisplay();
-      updateDailyHoursDisplay();
-      updateWeeklyHoursDisplay();
-      saveData();
+      updateDisplay();
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          saveData(user.uid);
+        }
+      });
     }
   });
 
   resetBtn.addEventListener('click', () => {
-    clearInterval(timer);
-    elapsedSeconds = 0;
-    isRunning = false;
-    updateTimerDisplay();
-    saveData();
+    if (!isRunning) {
+      elapsedSeconds = 0;
+      updateTimerDisplay();
+    }
   });
 
-  loadData();
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      userName.textContent = user.email;
+      loadUserData(user.uid);
+      loginScreen.style.display = 'none';
+      trackerScreen.style.display = 'block';
+    }
+  });
 });
 
 
-  
+
+
